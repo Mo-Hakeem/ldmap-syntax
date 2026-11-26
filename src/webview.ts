@@ -78,8 +78,8 @@ export function getMapWebviewContent(parsed: ParsedMap, fileName: string): strin
     border: 1px solid var(--vscode-panel-border, #3c3c3c);
     border-radius: 5px; padding: 10px 12px;
   }
-  .card-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-  .card-title { font-weight: 600; font-size: 13px; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .card-title { font-weight: 600; font-size: 13px; word-break: break-word; }
   .card-sub { color: var(--vscode-descriptionForeground, #999); font-size: 11px; }
   .bar-bg {
     height: 8px; border-radius: 4px; overflow: hidden;

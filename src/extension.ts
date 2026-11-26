@@ -57,8 +57,10 @@ class LdMapSymbolProvider implements vscode.DocumentSymbolProvider {
         continue;
       }
 
-      if (inMemoryMap && currentHeader && /^(\.[A-Za-z0-9_.*-]+|\/DISCARD\/)\b/.test(lineText)) {
-        const m = /^(\.[A-Za-z0-9_.*-]+|\/DISCARD\/)\s*(0x[0-9a-fA-F]+)?\s*(0x[0-9a-fA-F]+)?/.exec(lineText);
+      if (inMemoryMap && currentHeader &&
+          /^([A-Za-z_.$][A-Za-z0-9_.*$-]*|\/DISCARD\/)(?:\s|$)/.test(lineText) &&
+          !/^(LOAD|START GROUP|END GROUP|OUTPUT|AS_NEEDED|INPUT|GROUP)\b/.test(lineText)) {
+        const m = /^([A-Za-z_.$][A-Za-z0-9_.*$-]*|\/DISCARD\/)\s*(0x[0-9a-fA-F]+)?\s*(0x[0-9a-fA-F]+)?/.exec(lineText);
         if (m) {
           const range = document.lineAt(i).range;
           const detail = [m[2], m[3]].filter(Boolean).join(' ');

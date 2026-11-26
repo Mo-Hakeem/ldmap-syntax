@@ -86,12 +86,18 @@ function findRegion(regions: MemoryRegion[], addr: number): string {
   return '';
 }
 
-function classifyBucket(secName: string): 'text' | 'rodata' | 'data' | 'bss' | 'other' {
-  const s = secName.toLowerCase();
-  if (s.startsWith('.rodata')) return 'rodata';
-  if (s.startsWith('.text') || s.startsWith('.isr_vector') || s.startsWith('.init') || s.startsWith('.fini')) return 'text';
-  if (s.startsWith('.data')) return 'data';
-  if (s.startsWith('.bss') || s === 'common' || s.startsWith('.noinit')) return 'bss';
+function classifyBucket(outName: string, inName: string): 'text' | 'rodata' | 'data' | 'bss' | 'other' {
+  const i = inName.toLowerCase();
+  if (i.startsWith('.rodata')) return 'rodata';
+  if (i.startsWith('.text') || i.startsWith('.isr_vector') || i.startsWith('.fixed_vectors') || i.startsWith('.application_vectors') || i.startsWith('.init') || i.startsWith('.fini') || i.includes('_code')) return 'text';
+  if (i.startsWith('.data') || i.startsWith('.ram_from_')) return 'data';
+  if (i.startsWith('.bss') || i === 'common' || i.startsWith('.noinit') || i.startsWith('.stack') || i.startsWith('.heap')) return 'bss';
+
+  const o = outName.toLowerCase();
+  if (o.startsWith('.rodata')) return 'rodata';
+  if (o.startsWith('.text') || o.includes('readonly') || o.includes('vectors')) return 'text';
+  if (o.startsWith('.data') || o.includes('ram_from_')) return 'data';
+  if (o.startsWith('.bss') || o.includes('zero') || o.includes('noinit') || o.includes('stack') || o.includes('heap')) return 'bss';
   return 'other';
 }
 
@@ -280,11 +286,12 @@ export function parseLinkerMap(text: string): ParsedMap {
     }
 
     if (phase === 'map') {
-      // Top-level output section (column 0, starts with . or /DISCARD/)
-      if (/^(\.[A-Za-z0-9_.*-]+|\/DISCARD\/)\b/.test(raw)) {
+      // Top-level output section (column 0, not LOAD/START GROUP/END GROUP/OUTPUT/etc.)
+      if (/^([A-Za-z_.$][A-Za-z0-9_.*$-]*|\/DISCARD\/)(?:\s|$)/.test(raw) &&
+          !/^(LOAD|START GROUP|END GROUP|OUTPUT|AS_NEEDED|INPUT|GROUP)\b/.test(raw)) {
         pendingSectionName = null;
         currentIn = null;
-        const m = /^(\.[A-Za-z0-9_.*-]+|\/DISCARD\/)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)(?:\s+load address\s+(0x[0-9a-fA-F]+))?/.exec(raw);
+        const m = /^([A-Za-z_.$][A-Za-z0-9_.*$-]*|\/DISCARD\/)\s+(0x[0-9a-fA-F]+)\s+(0x[0-9a-fA-F]+)(?:\s+load address\s+(0x[0-9a-fA-F]+))?/.exec(raw);
         if (m) {
           const addr = parseHex(m[2]);
           const size = parseHex(m[3]);
@@ -297,7 +304,7 @@ export function parseLinkerMap(text: string): ParsedMap {
             inputs: [],
           };
           outputSections.push(currentOut);
-        } else {
+        } else if (!raw.includes('=')) {
           // Wrapped output section name on its own line
           pendingSectionName = trimmed;
           currentOut = {
@@ -404,10 +411,11 @@ export function parseLinkerMap(text: string): ParsedMap {
   // Compute memory region usage
   for (const sec of outputSections) {
     if (!isAllocatableOutputSection(sec)) continue;
+    const isNoLoad = /(?:^\.bss|^\.noinit|zero|noinit|stack|heap)/i.test(sec.name);
     for (const r of regions) {
       if (r.name === '*default*') continue;
       const inVma = sec.addr >= r.origin && sec.addr < r.origin + r.length;
-      const inLma = sec.lma !== undefined && sec.lma >= r.origin && sec.lma < r.origin + r.length;
+      const inLma = !isNoLoad && sec.lma !== undefined && sec.lma >= r.origin && sec.lma < r.origin + r.length;
       if (inVma || inLma) {
         r.used += sec.size;
       }
@@ -418,9 +426,9 @@ export function parseLinkerMap(text: string): ParsedMap {
   const objMap = new Map<string, ObjectSummary>();
   for (const sec of outputSections) {
     if (!isAllocatableOutputSection(sec)) continue;
-    const bucket = classifyBucket(sec.name);
     for (const inp of sec.inputs) {
       if (inp.size === 0) continue;
+      const bucket = classifyBucket(sec.name, inp.name);
       const key = inp.file;
       let obj = objMap.get(key);
       if (!obj) {
