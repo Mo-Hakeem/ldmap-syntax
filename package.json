@@ -1,0 +1,63 @@
+{
+  "name": "ldmap-syntax",
+  "displayName": "Linker Map (GNU LD)",
+  "description": "Syntax highlighting, outline symbols, and size hover for GNU LD linker map files (.map).",
+  "version": "0.1.0",
+  "publisher": "MohamedHakeem",
+  "license": "MIT",
+  "icon": "icon.png",
+  "keywords": [
+    "map",
+    "linker-map",
+    "ld",
+    "gnu-ld",
+    "gcc",
+    "embedded",
+    "firmware",
+    "arm"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:ldmap"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "ldmap",
+        "aliases": [
+          "Linker Map",
+          "GNU LD Map",
+          "map"
+        ],
+        "extensions": [
+          ".map"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ldmap",
+        "scopeName": "source.ldmap",
+        "path": "./syntaxes/ldmap.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}

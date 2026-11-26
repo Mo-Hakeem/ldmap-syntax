@@ -1,0 +1,136 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "GNU Linker Map",
+  "scopeName": "source.ldmap",
+  "patterns": [
+    { "include": "#major-headers" },
+    { "include": "#table-headers" },
+    { "include": "#comments" },
+    { "include": "#directives" },
+    { "include": "#fill-and-special" },
+    { "include": "#numbers" },
+    { "include": "#memory-attrs" },
+    { "include": "#section-names" },
+    { "include": "#archive-members" },
+    { "include": "#object-files" },
+    { "include": "#expressions" }
+  ],
+  "repository": {
+    "major-headers": {
+      "patterns": [
+        {
+          "name": "markup.heading.ldmap",
+          "match": "^(Archive member included to satisfy reference by file \\(symbol\\)|As-needed library included to satisfy reference by file \\(symbol\\)|Allocating common symbols|Discarded input sections|Memory Configuration|Linker script and memory map|Cross Reference Table)\\s*$"
+        }
+      ]
+    },
+    "table-headers": {
+      "patterns": [
+        {
+          "name": "meta.table-header.ldmap",
+          "match": "^(Name\\s+Origin\\s+Length\\s+Attributes|Common symbol\\s+size\\s+file|Symbol\\s+File)\\s*$"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.ldmap",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.number-sign.ldmap",
+          "match": "^\\s*#.*$"
+        }
+      ]
+    },
+    "directives": {
+      "patterns": [
+        {
+          "name": "keyword.control.ldmap",
+          "match": "^(LOAD|START GROUP|END GROUP|OUTPUT)\\b"
+        },
+        {
+          "name": "keyword.other.directive.ldmap",
+          "match": "\\b(PROVIDE|PROVIDE_HIDDEN|ASSERT|FILL|SORT_BY_NAME|SORT_BY_ALIGNMENT|ALIGN|ORIGIN|LENGTH|LOADADDR|ADDR|SIZEOF|DEFINED|MAX|MIN|ABSOLUTE|NOLOAD)\\b"
+        }
+      ]
+    },
+    "fill-and-special": {
+      "patterns": [
+        {
+          "name": "constant.language.fill.ldmap",
+          "match": "\\*fill\\*"
+        },
+        {
+          "name": "storage.modifier.common.ldmap",
+          "match": "\\b(COMMON|\\*default\\*|/DISCARD/)\\b"
+        },
+        {
+          "name": "keyword.operator.wildcard.ldmap",
+          "match": "\\*\\([^)]*\\)"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.ldmap",
+          "match": "\\b0[xX][0-9a-fA-F]+\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.ldmap",
+          "match": "(?<=\\s)[0-9]+(?=\\s|$)"
+        }
+      ]
+    },
+    "memory-attrs": {
+      "patterns": [
+        {
+          "name": "storage.type.memory-attr.ldmap",
+          "match": "(?<=\\s)[!rRwWxXaAiIlL]+(?=\\s*$)"
+        }
+      ]
+    },
+    "section-names": {
+      "patterns": [
+        {
+          "name": "entity.name.section.ldmap",
+          "match": "(?<![A-Za-z0-9_/\\\\-])\\.[A-Za-z_][A-Za-z0-9_.$-]*"
+        }
+      ]
+    },
+    "archive-members": {
+      "patterns": [
+        {
+          "match": "([A-Za-z0-9_./\\\\:-]+\\.a)\\(([^)]+\\.o)\\)",
+          "captures": {
+            "1": { "name": "string.unquoted.archive.ldmap" },
+            "2": { "name": "entity.name.function.member.ldmap" }
+          }
+        }
+      ]
+    },
+    "object-files": {
+      "patterns": [
+        {
+          "name": "string.unquoted.filepath.ldmap",
+          "match": "[A-Za-z0-9_./\\\\:-]+\\.(?:o|obj|a|elf|axf|out)\\b"
+        }
+      ]
+    },
+    "expressions": {
+      "patterns": [
+        {
+          "name": "variable.language.location-counter.ldmap",
+          "match": "(?<![A-Za-z0-9_\\.])\\.(?![A-Za-z0-9_\\.])"
+        },
+        {
+          "name": "keyword.operator.ldmap",
+          "match": "(=|\\+=|-=|\\+|\\-|\\*|/|<<|>>|&|\\|)"
+        }
+      ]
+    }
+  }
+}
