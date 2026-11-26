@@ -28,6 +28,32 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "customEditors": [
+      {
+        "viewType": "ldmap.mapView",
+        "displayName": "Linker Map Analyzer",
+        "selector": [
+          { "filenamePattern": "*.map" }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "ldmap.openAnalyzer",
+        "title": "Open Linker Map Analyzer",
+        "icon": "$(graph)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ldmap.openAnalyzer",
+          "when": "resourceExtname == .map",
+          "group": "navigation"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "ldmap",

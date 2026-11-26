@@ -1,4 +1,7 @@
+import * as path from 'path';
 import * as vscode from 'vscode';
+import { parseLinkerMap } from './parser';
+import { getMapWebviewContent } from './webview';
 
 const MAP_KEYWORD_DOCS: Record<string, string> = {
   '*fill*': 'Padding bytes inserted by the linker to satisfy alignment requirements.',
@@ -101,11 +104,90 @@ class LdMapHoverProvider implements vscode.HoverProvider {
   }
 }
 
+class MapViewProvider implements vscode.CustomReadonlyEditorProvider {
+  public static readonly viewType = 'ldmap.mapView';
+
+  public openCustomDocument(
+    uri: vscode.Uri,
+    _openContext: vscode.CustomDocumentOpenContext,
+    _token: vscode.CancellationToken
+  ): vscode.CustomDocument {
+    return { uri, dispose: () => {} };
+  }
+
+  public async resolveCustomEditor(
+    document: vscode.CustomDocument,
+    webviewPanel: vscode.WebviewPanel,
+    _token: vscode.CancellationToken
+  ): Promise<void> {
+    webviewPanel.webview.options = { enableScripts: true };
+    const fsPath = document.uri.fsPath;
+    const baseName = path.basename(fsPath) || fsPath;
+    webviewPanel.title = `${baseName} (map)`;
+
+    let initialized = false;
+    const load = async () => {
+      try {
+        const raw = await vscode.workspace.fs.readFile(document.uri);
+        const text = Buffer.from(raw).toString('utf8');
+        const parsed = parseLinkerMap(text);
+        if (!initialized) {
+          initialized = true;
+          webviewPanel.webview.html = getMapWebviewContent(parsed, baseName);
+        } else {
+          void webviewPanel.webview.postMessage({
+            type: 'update',
+            payload: { fileName: baseName, ...parsed },
+          });
+        }
+      } catch (err) {
+        initialized = false;
+        webviewPanel.webview.html = `<!DOCTYPE html><body style="font-family:sans-serif;padding:16px;color:#f48771">
+          Failed to parse map file: ${String(err)}</body>`;
+      }
+    };
+
+    await load();
+
+    const msgSub = webviewPanel.webview.onDidReceiveMessage(async (msg) => {
+      if (msg && msg.type === 'openRaw') {
+        await vscode.commands.executeCommand('vscode.openWith', document.uri, 'default');
+      }
+    });
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleLoad = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => { void load(); }, 250);
+    };
+    const watcher = vscode.workspace.createFileSystemWatcher(
+      new vscode.RelativePattern(vscode.Uri.file(path.dirname(fsPath)), baseName)
+    );
+    watcher.onDidChange(scheduleLoad);
+    watcher.onDidCreate(scheduleLoad);
+
+    webviewPanel.onDidDispose(() => {
+      if (timer) clearTimeout(timer);
+      watcher.dispose();
+      msgSub.dispose();
+    });
+  }
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   const selector: vscode.DocumentSelector = { language: 'ldmap' };
   context.subscriptions.push(
     vscode.languages.registerDocumentSymbolProvider(selector, new LdMapSymbolProvider()),
-    vscode.languages.registerHoverProvider(selector, new LdMapHoverProvider())
+    vscode.languages.registerHoverProvider(selector, new LdMapHoverProvider()),
+    vscode.window.registerCustomEditorProvider(MapViewProvider.viewType, new MapViewProvider(), {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
+    vscode.commands.registerCommand('ldmap.openAnalyzer', async (uri?: vscode.Uri) => {
+      const target = uri ?? vscode.window.activeTextEditor?.document.uri;
+      if (target) {
+        await vscode.commands.executeCommand('vscode.openWith', target, MapViewProvider.viewType);
+      }
+    })
   );
 }
 

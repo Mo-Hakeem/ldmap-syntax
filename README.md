@@ -4,9 +4,13 @@ Syntax highlighting, outline symbols, and size hover for GNU LD linker map files
 
 ## Features
 
-- **Syntax highlighting** — major map sections (`Memory Configuration`, `Linker script and memory map`, `Discarded input sections`, `Cross Reference Table`), output & input section names (`.isr_vector`, `.text`, `.rodata`, `.data`, `.bss`, `.debug_*`), `*fill*`, `COMMON`, `LOAD`, `START GROUP` / `END GROUP`, `PROVIDE`, hex addresses & sizes, object/archive file paths, and symbol names.
-- **Outline & Breadcrumbs (`Ctrl+Shift+O`)** — jump directly to major map sections and output sections (`.text`, `.data`, `.bss`, etc.).
-- **Smart Hover** — hover over any hex literal (e.g. `0x0001a4c0`) to see its exact byte count and KiB/MiB size, or hover over map keywords (`*fill*`, `COMMON`, `LOAD`, `PROVIDE`, etc.).
+- **Interactive Linker Map Analyzer** (opens `.map` files by default, with a one-click **Open Raw Text** toggle):
+  - **Memory Regions** — visual utilization bars (`Used / Length`, `%`, and `Free` bytes) for `FLASH`, `RAM`, `CCMRAM`, etc.
+  - **Output & Input Sections** — expandable output sections (`.isr_vector`, `.text`, `.rodata`, `.data`, `.bss`, etc.) showing VMA, LMA, size, input sections, `*fill*` padding, object files, and symbols.
+  - **Object File Breakdown** — sortable per-`.o`/`.a` size table (`Code`, `.rodata`, `.data`, `.bss`, `Total`).
+  - **Symbols, Discarded Sections & Cross References** — searchable symbol table, `--gc-sections` discarded space summary, archive members included, and cross-reference table.
+- **Syntax highlighting** — major map headings, section names, `*fill*`, `COMMON`, `LOAD`, `START GROUP` / `END GROUP`, `PROVIDE`, hex/decimal numbers, memory attributes, and object/archive paths when viewing raw text.
+- **Outline & Smart Hover** — `Ctrl+Shift+O` navigation and hex byte/KiB/MiB hover in raw text mode.
 
 ## Companion Extensions
 
