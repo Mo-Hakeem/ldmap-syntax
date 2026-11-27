@@ -1,6 +1,6 @@
 {
   "name": "ldmap-syntax",
-  "displayName": "Linker Map (GNU LD)",
+  "displayName": "MemMap — Linker Map Analyzer",
   "description": "Syntax highlighting, outline symbols, and size hover for GNU LD linker map files (.map).",
   "version": "0.1.0",
   "publisher": "MohamedHakeem",

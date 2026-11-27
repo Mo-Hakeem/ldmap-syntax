@@ -2,7 +2,7 @@
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
     <Identity Language="en-US" Id="ldmap-syntax" Version="0.1.0" Publisher="MohamedHakeem" />
-    <DisplayName>Linker Map (GNU LD)</DisplayName>
+    <DisplayName>MemMap — Linker Map Analyzer</DisplayName>
     <Description xml:space="preserve">Syntax highlighting, outline symbols, and size hover for GNU LD linker map files (.map).</Description>
     <Tags>map,linker-map,ld,gnu-ld,gcc,embedded,firmware,arm</Tags>
     <Categories>Programming Languages,Other</Categories>

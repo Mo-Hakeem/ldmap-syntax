@@ -1,4 +1,4 @@
-# Linker Map (GNU LD)
+# MemMap — Linker Map Analyzer
 
 Syntax highlighting, outline symbols, and size hover for GNU LD linker map files (`.map`).
 
